@@ -8,6 +8,7 @@
 import Foundation
 
 /// Wrapper for all requests
+@available(*, deprecated)
 public class ITunesNetworkClient {
     let dataLoader: DataLoader
     let urlSession: URLSession

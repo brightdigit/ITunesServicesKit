@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, deprecated)
 struct EndPoint {
     let path: String
     let queryItems: [URLQueryItem]

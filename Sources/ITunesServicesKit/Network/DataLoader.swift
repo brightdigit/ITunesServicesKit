@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, deprecated)
 class DataLoader {
     let urlSession: URLSession
     var dataTask: URLSessionDataTask?

@@ -8,6 +8,7 @@
 import Foundation
 
 /// Network related error
+@available(*, deprecated)
 public enum NetworkError: Error {
     case invalidURL
     case urlRequestFailed(message: String)

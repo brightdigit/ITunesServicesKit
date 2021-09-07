@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, deprecated)
 extension EndPoint {
     var url: URL? {
         var components = URLComponents()

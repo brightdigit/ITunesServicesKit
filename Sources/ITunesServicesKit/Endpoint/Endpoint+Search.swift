@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, deprecated)
 extension EndPoint {
     static func search(for term: String) -> EndPoint {
         let queryItems = [

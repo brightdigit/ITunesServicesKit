@@ -6,7 +6,66 @@
 //
 
 import Foundation
-import SwiftUI
+import Prch
+
+public enum Response: APIResponseValue, CustomStringConvertible, CustomDebugStringConvertible {
+  
+  
+
+  
+  public init(statusCode: Int, data: Data, decoder: ResponseDecoder) throws {
+    switch statusCode {
+    case 200: self = try .status200(decoder.decode(SearchResponse.self, from: data))
+    default: throw APIClientError.unexpectedStatusCode(statusCode: statusCode, data: data)
+    }
+  }
+  
+  
+  public typealias SuccessType = SearchResponse
+  
+  case status200(SearchResponse)
+  
+  public var success: SearchResponse? {
+    switch self {
+    case let .status200(response): return response
+    }
+  }
+
+  public var response: Any {
+    switch self {
+    case let .status200(response): return response
+    }
+  }
+
+  public var statusCode: Int {
+    switch self {
+    case .status200: return 200
+    }
+  }
+
+  public var successful: Bool {
+    switch self {
+    case .status200: return true
+    }
+  }
+
+  public var description: String {
+    "\(statusCode) \(successful ? "success" : "failure")"
+  }
+
+  public var debugDescription: String {
+    var string = description
+    let responseString = "\(response)"
+    if responseString != "()" {
+      string += "\n\(responseString)"
+    }
+    return string
+  }
+  
+}
+
+public final class Request: APIRequest<Response> {
+}
 
 public struct SearchResult: Decodable {
     public let id: Int
