@@ -76,9 +76,87 @@ public enum Response: APIResponseValue, CustomStringConvertible, CustomDebugStri
   
 }
 
-public typealias MediaType = Void
+public enum MediaType : String {
+  
+  
+  case movie, podcast, music, musicVideo, audiobook, shortFilm, tvShow, software, ebook, all
+}
+public enum Language : String {
+  case english = "en_us"
+  case japanese = "ja_jp"
+}
+
+public enum Version : Int {
+  case v1 = 1
+  case v2 = 2
+}
+
+public enum Entity : String {
+  //movie
+  case movieArtist, movie
+  // podcast
+  case podcastAuthor, podcast
+  // music
+  case musicArtist, musicTrack, album, musicVideo, mix, song
+  // Please note that “musicTrack” can include both songs and music videos in the results
+  // musicVideo
+  //case musicArtist, musicVideo
+  // audiobook
+  case audiobookAuthor, audiobook
+  // shortFilm
+  case shortFilmArtist, shortFilm
+  // tvShow
+  case tvEpisode, tvSeason
+  // software
+  case software, iPadSoftware, macSoftware
+  // ebook
+  case ebook
+  // all
+  //case movie, album, allArtist, podcast, musicVideo, mix, audiobook, tvSeason,
+  case allTrack
+  
+  public enum Movie {
+    static let artist : Entity = .movieArtist
+  }
+  
+  public enum Podcast {
+    static let author : Entity = .podcastAuthor
+  }
+  
+  public enum Music {
+    public static let  artist : Entity = .musicArtist
+    public static let  track : Entity = .musicTrack
+    public static let  album : Entity = .album
+    public static let  video : Entity = .musicVideo
+    public static let  mix : Entity = .mix
+    public static let  song : Entity = .song
+  }
+  
+  public enum MusicVideo {
+    public static let  artist : Entity = .musicArtist
+    public static let  video : Entity = .musicVideo
+  }
+}
 
 public final class Request: APIRequest<Response> {
+  public init(
+    term: String,
+    country: Locale? = nil,
+    mediaType: MediaType? = nil,
+    limit: Int? = nil,
+    language: Language? = nil,
+    version: Version? = nil,
+    explicit: Bool? = nil) {
+      self.term = term
+    self.country = country
+    self.mediaType = mediaType
+    self.limit = limit
+    self.language = language
+    self.version = version
+    self.explicit = explicit
+      super.init(service: Self.service)
+  }
+  
   public static let service = APIService<Response>(id: "Bulk Remove a List of Issues", tag: "", method: "GET", path: "/search/", hasBody: false, securityRequirements: [])
   
 //  term
@@ -100,9 +178,10 @@ public final class Request: APIRequest<Response> {
 //  entity
 //  The type of results you want returned, relative to the specified media type. For example: movieArtist for a movie media type search. The default is the track entity associated with the specified media type.
 //  N
-  public let term : String = ""
-  public let country: Locale =  Locale(identifier: "US")
-  public let mediaType : MediaType = ()
+  public let term : String
+  public let country: Locale?
+  public let mediaType : MediaType?
+  public let entity: Entity?
 //  For a list of available entitites, see Table 2-1.
 //  attribute
 //  The attribute you want to search for in the stores, relative to the specified media type. For example, if you want to search for an artist by name specify entity=allArtist&attribute=allArtistTerm. In this example, if you search for term=maroon, iTunes returns “Maroon 5” in the search results, instead of all artists who have ever recorded a song with the word “maroon” in the title.
@@ -113,20 +192,28 @@ public final class Request: APIRequest<Response> {
 //  The name of the Javascript callback function you want to use when returning search results to your website.
 //  Y, for cross-site searches
 //  wsSearchCB
+  public let limit : Int?
 //  limit
 //  The number of search results you want the iTunes Store to return. For example: 25. The default is 50.
 //  N
 //  1 to 200
 //  lang
 //  The language, English or Japanese, you want to use when returning search results. Specify the language using the five-letter codename. For example: en_us. The default is en_us (English).
+  public let language : Language?
 //  N
 //  en_us, ja_jp
 //  version
 //  The search result key version you want to receive back from your search. The default is 2.
 //  N
 //  1,2
+  public let version : Version?
 //  explicit
   // A flag indicating whether or not you want to include explicit content in your search results. The default is Yes.
+  public let explicit : Bool?
+  
+  public override var queryParameters: [String : Any] {
+    
+  }
 //  let queryItems = [
 //    URLQueryItem(name: "term", value: term),
 //    URLQueryItem(name: "media", value: "software"),
