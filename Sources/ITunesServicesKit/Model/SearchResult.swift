@@ -76,9 +76,91 @@ public enum Response: APIResponseValue, CustomStringConvertible, CustomDebugStri
   
 }
 
-public enum MediaType : String {
+public struct MediaEntity {
+  let mediaType : MediaType
+  let entity : Entity?
+  
+  public enum Movie {
+    static let artist : MediaEntity = .init(mediaType: .movie, entity: .movieArtist)
+    static let movie : MediaEntity = .init(mediaType: .movie, entity: .movie)
+    static let `default` : MediaEntity = .init(mediaType: .movie, entity: nil)
+  }
+  
+  public enum Podcast {
+    static let author : MediaEntity = .init(mediaType: .podcast, entity:.podcastAuthor)
+    static let podcast : MediaEntity = .init(mediaType: .podcast, entity:.podcast)
+    static let `default` : MediaEntity = .init(mediaType: .podcast, entity: nil)
+  }
+  
+  public enum Music {
+    public static let  artist : MediaEntity = .init(mediaType: .music, entity:.musicArtist)
+    public static let  track : MediaEntity = .init(mediaType: .music, entity:.musicTrack)
+    public static let  album : MediaEntity = .init(mediaType: .music, entity:.album)
+    public static let  video : MediaEntity = .init(mediaType: .music, entity:.musicVideo)
+    public static let  mix : MediaEntity = .init(mediaType: .music, entity:.mix)
+    public static let  song : MediaEntity = .init(mediaType: .music, entity:.song)
+    static let `default` : MediaEntity = .init(mediaType: .music, entity: nil)
+  }
+  
+  public enum MusicVideo {
+    public static let  artist : MediaEntity = .init(mediaType: .musicVideo, entity:.musicArtist)
+    public static let  video : MediaEntity = .init(mediaType: .musicVideo, entity:.musicVideo)
+    static let `default` : MediaEntity = .init(mediaType: .musicVideo, entity: nil)
+  }
+  
+  public enum Audiobook {
+    public static let audiobookAuthor : MediaEntity = .init(mediaType: .audiobook, entity: .audiobookAuthor)
+    public static let audiobook : MediaEntity = .init(mediaType: .audiobook, entity: .audiobook)
+    static let `default` : MediaEntity = .init(mediaType: .audiobook, entity: nil)
+  }
   
   
+  public enum ShortFilm {
+    public static let shortFilmArtist : MediaEntity = .init(mediaType: .shortFilm, entity: .shortFilmArtist)
+    public static let   shortFilm : MediaEntity = .init(mediaType: .shortFilm, entity: .  shortFilm)
+    static let `default` : MediaEntity = .init(mediaType: .shortFilm, entity: nil)
+  }
+  
+  public enum TvShow {
+    public static let tvEpisode : MediaEntity = .init(mediaType: .tvShow, entity: .tvEpisode)
+    public static let tvSeason : MediaEntity = .init(mediaType: .tvShow, entity: .  tvSeason)
+    static let `default` : MediaEntity = .init(mediaType: .tvShow, entity: nil)
+  }
+  
+  public enum Software {
+    public static let software : MediaEntity = .init(mediaType: .software, entity: .software)
+    public static let iPadSoftware : MediaEntity = .init(mediaType: .software, entity: .  iPadSoftware)
+    public static let macSoftware : MediaEntity = .init(mediaType: .software, entity: .  macSoftware)
+    static let `default` : MediaEntity = .init(mediaType: .software, entity: nil)
+  }
+
+  public enum EBook {
+    public static let ebook : MediaEntity = .init(mediaType: .ebook, entity: .ebook)
+    static let `default` : MediaEntity = .init(mediaType: .ebook, entity: nil)
+  }
+  
+  public enum All {
+    public static let movie : MediaEntity = .init(mediaType: .all, entity: .movie)
+    public static let album : MediaEntity = .init(mediaType: .all, entity: .album)
+    public static let allArtist : MediaEntity = .init(mediaType: .all, entity: .allArtist)
+    public static let podcast : MediaEntity = .init(mediaType: .all, entity: .podcast)
+    public static let musicVideo : MediaEntity = .init(mediaType: .all, entity: .musicVideo)
+    public static let mix : MediaEntity = .init(mediaType: .all, entity: .mix)
+    public static let audiobook : MediaEntity = .init(mediaType: .all, entity: .audiobook)
+    public static let tvSeason : MediaEntity = .init(mediaType: .all, entity: .tvSeason)
+    public static let allTrack : MediaEntity = .init(mediaType: .all, entity: .allTrack)
+  }
+
+
+
+
+
+
+
+
+
+}
+internal enum MediaType : String {
   case movie, podcast, music, musicVideo, audiobook, shortFilm, tvShow, software, ebook, all
 }
 public enum Language : String {
@@ -91,7 +173,7 @@ public enum Version : Int {
   case v2 = 2
 }
 
-public enum Entity : String {
+internal enum Entity : String {
   //movie
   case movieArtist, movie
   // podcast
@@ -113,36 +195,28 @@ public enum Entity : String {
   case ebook
   // all
   //case movie, album, allArtist, podcast, musicVideo, mix, audiobook, tvSeason,
-  case allTrack
+  case allArtist, allTrack
   
-  public enum Movie {
-    static let artist : Entity = .movieArtist
-  }
-  
-  public enum Podcast {
-    static let author : Entity = .podcastAuthor
-  }
-  
-  public enum Music {
-    public static let  artist : Entity = .musicArtist
-    public static let  track : Entity = .musicTrack
-    public static let  album : Entity = .album
-    public static let  video : Entity = .musicVideo
-    public static let  mix : Entity = .mix
-    public static let  song : Entity = .song
-  }
-  
-  public enum MusicVideo {
-    public static let  artist : Entity = .musicArtist
-    public static let  video : Entity = .musicVideo
+
+}
+
+extension Dictionary {
+  mutating func trim () -> Self {
+    for (key, value) in self {
+      if self[key] == nil {
+        self.removeValue(forKey: key)
+      }
+    }
+    return self
   }
 }
 
 public final class Request: APIRequest<Response> {
-  public init(
+  internal init(
     term: String,
     country: Locale? = nil,
     mediaType: MediaType? = nil,
+    entity: Entity? = nil,
     limit: Int? = nil,
     language: Language? = nil,
     version: Version? = nil,
@@ -150,6 +224,26 @@ public final class Request: APIRequest<Response> {
       self.term = term
     self.country = country
     self.mediaType = mediaType
+      self.entity = entity
+    self.limit = limit
+    self.language = language
+    self.version = version
+    self.explicit = explicit
+      super.init(service: Self.service)
+  }
+  
+  public init(
+    term: String,
+    country: Locale? = nil,
+    mediaEntity: MediaEntity? = nil,
+    limit: Int? = nil,
+    language: Language? = nil,
+    version: Version? = nil,
+    explicit: Bool? = nil) {
+      self.term = term
+    self.country = country
+      self.mediaType = mediaEntity?.mediaType
+      self.entity = mediaEntity?.entity
     self.limit = limit
     self.language = language
     self.version = version
@@ -180,8 +274,8 @@ public final class Request: APIRequest<Response> {
 //  N
   public let term : String
   public let country: Locale?
-  public let mediaType : MediaType?
-  public let entity: Entity?
+  let mediaType : MediaType?
+  let entity: Entity?
 //  For a list of available entitites, see Table 2-1.
 //  attribute
 //  The attribute you want to search for in the stores, relative to the specified media type. For example, if you want to search for an artist by name specify entity=allArtist&attribute=allArtistTerm. In this example, if you search for term=maroon, iTunes returns “Maroon 5” in the search results, instead of all artists who have ever recorded a song with the word “maroon” in the title.
@@ -212,7 +306,16 @@ public final class Request: APIRequest<Response> {
   public let explicit : Bool?
   
   public override var queryParameters: [String : Any] {
-    
+    var parameters = [String : Any]()
+    parameters["term"] = term
+    parameters["country"] = country?.regionCode
+    parameters["mediaType"] = mediaType
+    parameters["entity"] = entity
+    parameters["limit"] = limit
+    parameters["language"] = language
+    parameters["version"] = version
+    parameters["explicit"] = explicit
+    return parameters.trim()
   }
 //  let queryItems = [
 //    URLQueryItem(name: "term", value: term),

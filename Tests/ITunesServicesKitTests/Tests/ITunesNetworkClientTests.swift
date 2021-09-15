@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import Prch
 @testable import ITunesServicesKit
 
 final class ITunesNetworkClientTests: XCTestCase {
@@ -20,22 +21,35 @@ final class ITunesNetworkClientTests: XCTestCase {
     }
     
     func testSearchRequest() {
-        let client = ITunesNetworkClient(urlSession: session)
-        
-        let iTunesExpectation = expectation(description: "Itunes Search Request")
-        
-        client.search(for: "test") { result in
-            iTunesExpectation.fulfill()
-            
-            switch result {
-            case .success(let response):
-                XCTAssertEqual(response.results.count, 2, "2 results should be returned")
-            case .failure:
-                XCTFail("Search result should be returned")
-            }
-        }
-        
-        wait(for: [iTunesExpectation], timeout: 5.0)
+      let client = APIClient(api: iTunes(), session: URLSession.shared)
+      
+      
+      let iTunesExpectation = expectation(description: "Itunes Search Request")
+      
+      client.request(Request(term: "test")) { result in
+        iTunesExpectation.fulfill()
+                    switch result {
+                    case .success(.status200(let response)):
+                        XCTAssertEqual(response.results.count, 2, "2 results should be returned")
+                    default:
+                        XCTFail("Search result should be returned")
+                    }
+      }
+//        let client = ITunesNetworkClient(urlSession: session)
+//
+//        
+//        client.search(for: "test") { result in
+//            iTunesExpectation.fulfill()
+//            
+//            switch result {
+//            case .success(let response):
+//                XCTAssertEqual(response.results.count, 2, "2 results should be returned")
+//            case .failure:
+//                XCTFail("Search result should be returned")
+//            }
+//        }
+//        
+       wait(for: [iTunesExpectation], timeout: 5.0)
     }
     
     static var allTests = [
